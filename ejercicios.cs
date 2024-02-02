@@ -43,3 +43,62 @@ MySQL:
 MongoDB:
 
 9. Averigua si existe la posibilidad en MongoDB de decidir en qué archivo se almacena una colección.
+ls
+
+
+# Almacenamiento de Colecciones en MongoDB
+
+En MongoDB, la asignación directa de colecciones a archivos específicos en el sistema de archivos no es una característica disponible para los usuarios. La gestión del almacenamiento es manejada de manera automática por MongoDB, siguiendo un enfoque que abstrae los detalles de almacenamiento a nivel de archivo para simplificar la administración de la base de datos.
+
+## Métodos Indirectos de Influencia en el Almacenamiento
+
+Aunque no se puede decidir directamente el archivo específico para una colección, existen algunas características y técnicas que permiten influir de manera indirecta en cómo y dónde se almacenan los datos:
+
+### 1. Sharding
+
+- **Descripción**: Distribuye los datos de una base de datos entre varios servidores (shards).
+- **Propósito**: Permite la escalabilidad horizontal, pero no controla el almacenamiento a nivel de archivos individuales dentro de un servidor.
+
+### 2. Particiones a Nivel de Sistema Operativo o Almacenamiento
+
+- **Descripción**: Configurar el sistema de archivos o soluciones de almacenamiento para designar en qué dispositivo físico o partición se almacenan los datos de MongoDB.
+- **Propósito**: Afecta a toda la instancia de MongoDB y no a colecciones individuales, basándose en la configuración del directorio de datos.
+
+### 3. WiredTiger Storage Engine
+
+- **Descripción**: Motor de almacenamiento predeterminado de MongoDB, que gestiona cómo se almacenan los datos en el disco.
+- **Propósito**: Ofrece optimización automática del almacenamiento y el rendimiento de los datos, sin permitir asignación de colecciones a archivos específicos.
+
+## Conclusión
+MongoDB está diseñado para manejar el almacenamiento de datos de forma eficiente y automática, sin requerir ni permitir la intervención manual en la asignación específica de colecciones a archivos. Este diseño busca simplificar la administración de la base de datos y optimizar el rendimiento y la escalabilidad sin sacrificar la flexibilidad.
+
+
+
+
+# Recursos y Fuentes consultadas sobre MongoDB
+
+
+## Documentación Oficial de MongoDB
+
+
+- [MongoDB Documentation](https://docs.mongodb.com/)
+
+## MongoDB University
+
+
+- [MongoDB University](https://university.mongodb.com/)
+
+## Foro de la Comunidad MongoDB
+
+
+- [MongoDB Community Forums](https://www.mongodb.com/community/forums/)
+
+## MongoDB Blog
+
+
+- [MongoDB Blog](https://www.mongodb.com/blog)
+
+## WiredTiger Documentation
+
+
+- [WiredTiger Documentation](http://source.wiredtiger.com/)
