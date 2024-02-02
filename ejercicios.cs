@@ -38,12 +38,56 @@ Postgres:
 
 MySQL:
 
+
+Tanto MySQL como Oracle utilizan el concepto de espacios de tablas (tablespaces) pero con diferencias notables en su implementación y uso.
+
+## Espacios de Tablas en MySQL
+
+En MySQL, un espacio de tablas es una unidad de almacenamiento que consiste en uno o más archivos en el sistema de archivos que almacenan los datos para una o más tablas y sus índices. Los espacios de tablas permiten a MySQL gestionar el almacenamiento de datos de manera eficiente.
+
+- **Características clave**:
+  - A partir de MySQL 5.6, se introdujo la característica de tablespaces generales que permite a los usuarios definir tablespaces fuera del sistema de archivos de base de datos predeterminado.
+  - MySQL 8.0 expande las capacidades de los tablespaces, incluyendo la posibilidad de crear tablespaces para InnoDB que pueden albergar múltiples tablas.
+  - Permite una mejor gestión del almacenamiento y optimización del rendimiento.
+
+- **URLs para consulta**:
+  - [MySQL Tablespaces](https://dev.mysql.com/doc/refman/8.0/en/general-tablespaces.html)
+  - [InnoDB Tablespaces](https://dev.mysql.com/doc/refman/8.0/en/innodb-tablespace.html)
+
+## Tablespaces en Oracle
+
+Oracle utiliza tablespaces como la estructura principal de almacenamiento para organizar y almacenar los datos. Un tablespace en Oracle puede contener distintos tipos de objetos de base de datos, como tablas, índices, y grandes objetos (LOBs). 
+
+- **Características clave**:
+  - Los tablespaces en Oracle pueden ser de varios tipos, como pequeños y grandes archivos (smallfile y bigfile).
+  - Oracle permite una gestión avanzada de tablespaces, incluyendo tablespaces temporales y de deshacer, así como la capacidad de transportar tablespaces entre distintas bases de datos.
+  - Ofrece funcionalidades avanzadas de segmentación y particionamiento dentro de los tablespaces para optimizar el rendimiento y la gestión del espacio.
+
+- **URLs para consulta**:
+  - [Managing Tablespaces in Oracle](https://docs.oracle.com/en/database/oracle/oracle-database/19/admin/managing-tablespaces.html)
+  - [Oracle Tablespaces](https://docs.oracle.com/cd/B28359_01/server.111/b28310/tspaces001.htm)
+
+## Diferencias Clave
+
+- **Flexibilidad y Uso**: Oracle ofrece una mayor flexibilidad en la gestión de tablespaces, incluyendo tipos especializados y avanzadas capacidades de administración. MySQL, aunque ha mejorado su soporte de tablespaces, se enfoca en simplicidad y eficiencia dentro de su modelo de gestión.
+- **Soporte Multitable**: MySQL desde la versión 5.7 permite tablespaces generales que pueden contener múltiples tablas, un concepto que Oracle ha soportado desde hace mucho tiempo con sus tablespaces que pueden albergar diversos tipos de objetos de base de datos.
+- **Funcionalidades Avanzadas**: Oracle ofrece funcionalidades más avanzadas como tablespaces temporales y de deshacer, y la capacidad de transportar tablespaces entre bases de datos, lo cual es particularmente útil en entornos empresariales y de alta disponibilidad.
+
+Estas diferencias reflejan las filosofías subyacentes de cada sistema de gestión de bases de datos, con Oracle apuntando a entornos empresariales de gran escala y MySQL ofreciendo una solución eficiente y de fácil manejo.
+
+
 8. Averigua si existe el concepto de espacio de tablas en MySQL y las diferencias con los tablespaces de ORACLE.
 
 MongoDB:
 
 9. Averigua si existe la posibilidad en MongoDB de decidir en qué archivo se almacena una colección.
 ls
+
+
+
+
+
+
 
 
 # Almacenamiento de Colecciones en MongoDB
