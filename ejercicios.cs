@@ -36,7 +36,51 @@ Postgres:
 
 7. Averigua si existe el concepto de segmento y el de extensión en Postgres, en qué consiste y las diferencias con los conceptos correspondientes de ORACLE.
 
+
+# Conceptos de Segmento y Extensión en PostgreSQL vs. Oracle
+
+Oracle y PostgreSQL gestionan el almacenamiento de datos de manera diferente, lo que se refleja en sus conceptos de segmentos y extensiones.
+
+## Oracle
+
+En Oracle, un **segmento** es un conjunto de estructuras de almacenamiento, como tablas o índices, que ocupan espacio de almacenamiento. Un **segmento** se compone de uno o más **extensiones**, que son unidades de espacio que se asignan a un segmento cuando este necesita crecer. Los segmentos y extensiones son fundamentales en la gestión del espacio en Oracle, permitiendo un control detallado y flexible del almacenamiento de datos.
+
+- **Características clave**:
+  - Los segmentos se clasifican por tipo, incluyendo segmentos de tabla, segmentos de índice, y otros.
+  - Las extensiones permiten el crecimiento dinámico de los segmentos según la demanda.
+
+## PostgreSQL
+
+PostgreSQL no utiliza los términos **segmento** y **extensión** como tales. En su lugar, gestiona el almacenamiento a través de un conjunto de archivos en el sistema de archivos del servidor. La unidad básica de almacenamiento en PostgreSQL es el **bloque**, típicamente de 8KB, y las tablas se almacenan en un conjunto de archivos de un gigabyte llamados **"forks"**. Cuando una tabla o índice crece más allá del tamaño de un archivo, PostgreSQL crea automáticamente un nuevo archivo (o "fork").
+
+- **Características clave**:
+  - El almacenamiento de datos se basa en archivos que pueden expandirse según sea necesario, pero el concepto es más abstracto que en Oracle y menos visible para el administrador de la base de datos.
+  - PostgreSQL maneja internamente el crecimiento de los archivos de datos y la asignación de espacio sin necesidad de una intervención manual detallada en términos de segmentos y extensiones.
+
+## Comparación y Diferencias Clave
+
+- **Gestión del Espacio**: Oracle proporciona una gestión detallada del espacio a través de segmentos y extensiones, mientras que PostgreSQL maneja el espacio de manera más automática y abstracta.
+- **Visibilidad para el Administrador**: Oracle permite a los administradores de bases de datos tener un control y una visibilidad más detallados sobre cómo se asigna y utiliza el espacio en disco. En PostgreSQL, este proceso es más automatizado y menos transparente.
+- **Flexibilidad y Control**: Oracle ofrece más flexibilidad y control en la administración del espacio de almacenamiento, lo cual es esencial en entornos empresariales grandes y complejos. PostgreSQL simplifica la gestión del espacio, lo que puede ser beneficioso para sistemas más pequeños o para aquellos que prefieren una administración menos compleja.
+
+## Fuentes para Consulta
+
+- **PostgreSQL Documentation**: Para comprender en profundidad cómo PostgreSQL gestiona el almacenamiento de datos.
+  - [PostgreSQL Storage System](https://www.postgresql.org/docs/current/storage.html)
+
+- **Oracle Documentation**: Para detalles sobre la gestión de segmentos y extensiones en Oracle.
+  - [Managing Space for Schema Objects in Oracle](https://docs.oracle.com/en/database/oracle/oracle-database/19/admin/managing-space-for-schema-objects.html)
+
+Estas diferencias reflejan las filosofías de diseño y los objetivos de uso de cada sistema de gestión de bases de datos, con Oracle enfocándose en ofrecer gran control y flexibilidad en entornos empresariales, mientras que PostgreSQL busca simplificar la gestión del almacenamiento y la administración de la base de datos.
+
+
+
+
+
 MySQL:
+
+
+8. Averigua si existe el concepto de espacio de tablas en MySQL y las diferencias con los tablespaces de ORACLE.
 
 
 Tanto MySQL como Oracle utilizan el concepto de espacios de tablas (tablespaces) pero con diferencias notables en su implementación y uso.
@@ -76,16 +120,9 @@ Oracle utiliza tablespaces como la estructura principal de almacenamiento para o
 Estas diferencias reflejan las filosofías subyacentes de cada sistema de gestión de bases de datos, con Oracle apuntando a entornos empresariales de gran escala y MySQL ofreciendo una solución eficiente y de fácil manejo.
 
 
-8. Averigua si existe el concepto de espacio de tablas en MySQL y las diferencias con los tablespaces de ORACLE.
-
 MongoDB:
 
 9. Averigua si existe la posibilidad en MongoDB de decidir en qué archivo se almacena una colección.
-ls
-
-
-
-
 
 
 
