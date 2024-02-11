@@ -10,9 +10,124 @@ ORACLE:
 
 1. Establece que los objetos que se creen en el TS1 (creado por tí) tengan un tamaño inicial de 200K, y que cada extensión sea del doble del tamaño que la anterior. El número máximo de extensiones debe ser de 3.
 
-2. Crea dos tablas en el tablespace recién creado e inserta un registro en cada una de ellas. Comprueba el espacio libre existente en el tablespace. Borra una de las tablas y comprueba si ha aumentado el espacio disponible en el tablespace. Explica la razón.
+CREATE TABLESPACE TS1 
+DATAFILE '/opt/oracle/oradata/ORCLCDB/ts1.dbf' SIZE 200K 
+AUTOEXTEND ON NEXT 200K MAXSIZE 1600K;
 
-3. Convierte a TS1 en un tablespace de sólo lectura. Intenta insertar registros en la tabla existente. ¿Qué ocurre?. Intenta ahora borrar la tabla. ¿Qué ocurre? ¿Porqué crees que pasa eso?
+
+
+CREATE USER nuevo_usuario IDENTIFIED BY contraseña
+DEFAULT TABLESPACE ts1
+TEMPORARY TABLESPACE temp
+QUOTA UNLIMITED ON ts1;
+
+
+
+CREATE TABLE ejemplo (
+    id NUMBER,
+    data VARCHAR2(50)
+)
+TABLESPACE ts1
+STORAGE (
+    INITIAL 200K
+    NEXT 200K
+    MAXEXTENTS 3
+);
+
+
+
+
+
+
+
+2. Crea dos tablas en el tablespace recién creado e inserta un registro en cada una de ellas. 
+Comprueba el espacio libre existente en el tablespace. Borra una de las tablas y comprueba si ha aumentado
+ el espacio disponible en el tablespace. Explica la razón.
+
+
+CREATE TABLE empleados (
+    empleado_id NUMBER PRIMARY KEY,
+    nombre VARCHAR2(100),
+    departamento_id NUMBER
+) TABLESPACE ts1;
+
+CREATE TABLE departamentos (
+    departamento_id NUMBER PRIMARY KEY,
+    nombre VARCHAR2(100)
+) TABLESPACE ts1;
+
+
+INSERT INTO departamentos (departamento_id, nombre) VALUES (1, 'Tecnología de la Información');
+INSERT INTO empleados (empleado_id, nombre, departamento_id) VALUES (1, 'Juan Pérez', 1);
+
+
+
+Comprobación del Espacio Libre en el Tablespace TS1 (Antes de Borrar la Tabla)
+
+
+
+SELECT TABLESPACE_NAME, FILE_NAME, BYTES, MAXBYTES, AUTOEXTENSIBLE
+FROM DBA_DATA_FILES
+WHERE TABLESPACE_NAME = 'TS1';
+
+SELECT TABLESPACE_NAME, SUM(BYTES)/1024/1024 AS FREE_MB
+FROM DBA_FREE_SPACE
+WHERE TABLESPACE_NAME = 'TS1'
+GROUP BY TABLESPACE_NAME;
+
+
+Eliminación de la Tabla departamentos
+
+
+
+DROP TABLE departamentos;
+
+Comprobación del Espacio Libre en el Tablespace TS1 (Después de Borrar la Tabla)
+
+
+
+SELECT TABLESPACE_NAME, FILE_NAME, BYTES, MAXBYTES, AUTOEXTENSIBLE
+FROM DBA_DATA_FILES
+WHERE TABLESPACE_NAME = 'TS1';
+
+SELECT TABLESPACE_NAME, SUM(BYTES)/1024/1024 AS FREE_MB
+FROM DBA_FREE_SPACE
+WHERE TABLESPACE_NAME = 'TS1'
+GROUP BY TABLESPACE_NAME;
+
+
+Al borrar una tabla en Oracle, el espacio que ocupaba se libera en el tablespace, 
+aumentando el espacio disponible para otros objetos. Este comportamiento se observó al eliminar departamentos, 
+donde el espacio libre en TS1 creció de 0,125 MB a 0,25 MB. Oracle gestiona eficientemente este espacio dentro 
+del tablespace, permitiendo su reutilización sin devolverlo al sistema operativo
+ optimizando así la administración del almacenamiento.
+
+
+
+
+
+3. Convierte a TS1 en un tablespace de sólo lectura. Intenta insertar registros en la tabla existente.
+ ¿Qué ocurre?. Intenta ahora borrar la tabla. ¿Qué ocurre? ¿Porqué crees que pasa eso?
+
+ALTER TABLESPACE ts1 READ ONLY;
+
+INSERT INTO empleados (empleado_id, nombre, departamento_id) VALUES (2, 'Ana Ruiz', 1);
+
+
+DROP TABLE empleados;
+
+
+    Inserción de Registros: La inserción falló porque implica escribir datos nuevos en el tablespace,
+    
+     lo cual está directamente restringido en tablespaces de solo lectura.
+
+    Borrado de la Tabla: Aunque el tablespace estaba configurado como solo lectura, el borrado de la tabla fue exitoso.
+    Esto es posible porque el borrado de una tabla implica cambios en el catálogo de datos de Oracle (metadatos),
+    no directamente en los archivos de datos del tablespace de solo lectura.
+    Oracle permite ciertas operaciones que modifican metadatos, como borrar tablas o modificar estructuras de tabla,
+    incluso en tablespaces de solo lectura, porque estas operaciones no cambian los datos existentes dentro de los archivos
+    de datos.
+
 
 4. Crea un espacio de tablas TS2 con dos ficheros en rutas diferentes de 1M cada uno no autoextensibles. Crea en el citado tablespace una tabla con la clausula de almacenamiento que quieras. Inserta registros hasta que se llene el tablespace. ¿Qué ocurre?
 
