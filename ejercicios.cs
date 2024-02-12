@@ -131,21 +131,171 @@ DROP TABLE empleados;
 
 4. Crea un espacio de tablas TS2 con dos ficheros en rutas diferentes de 1M cada uno no autoextensibles. Crea en el citado tablespace una tabla con la clausula de almacenamiento que quieras. Inserta registros hasta que se llene el tablespace. ¿Qué ocurre?
 
+1. Creación de un Tablespace
+
+Este comando crea un tablespace llamado TS2 con dos archivos de datos, especificando rutas, tamaños y la opción de no autoextenderse.
+
+
+CREATE TABLESPACE TS2 
+  DATAFILE '/opt/oracle/oradata/ORCLCDB/ts2a.dbf' SIZE 1M REUSE,
+           '/opt/oracle/oradata/ORCLCDB/ts2b.dbf' SIZE 1M REUSE
+  AUTOEXTEND OFF;
+
+2. Creación de una Tabla en el Tablespace
+
+Este comando crea una tabla llamada tabla_prueba en el tablespace TS2, con una cláusula de almacenamiento específica.
+
+
+CREATE TABLE tabla_prueba (
+    id NUMBER,
+    texto VARCHAR2(50)
+) TABLESPACE TS2
+STORAGE (
+    INITIAL 64K
+    NEXT 64K
+    MAXEXTENTS UNLIMITED
+);
+
+3. Insertar Registros Hasta Llenar el Tablespace
+
+Este bloque PL/SQL intenta insertar registros en tabla_prueba hasta que el tablespace se llena, manejando el error específico que ocurre cuando no hay más espacio disponible.
+
+sql
+
+BEGIN
+    FOR i IN 1..1000000 LOOP
+        BEGIN
+            INSERT INTO tabla_prueba (id, texto) VALUES (i, 'Texto de prueba ' || TO_CHAR(i));
+        EXCEPTION
+            WHEN OTHERS THEN
+                IF SQLCODE = -1653 THEN
+                    DBMS_OUTPUT.PUT_LINE('Error: El tablespace TS2 está lleno. No se pueden insertar más registros.');
+                    EXIT; -- Sale del bucle
+                ELSE
+                    DBMS_OUTPUT.PUT_LINE('Error no esperado: ' || SQLERRM);
+                    EXIT; -- Sale del bucle por otros errores
+                END IF;
+        END;
+    END LOOP;
+    COMMIT;
+END;
+/
+
+¿Qué Ocurre Cuando el Tablespace se Llena?
+
+Cuando el tablespace TS2 se llena, Oracle arrojará un error (typicamente ORA-01653) al intentar insertar más registros,
+ indicando que no puede extender la tabla en el tablespace especificado debido a la falta de espacio.
+ Al capturar este error, el bloque PL/SQL te informará y dejará de intentar insertar más registros.
+
+
+
 5. Realiza una consulta al diccionario de datos que muestre qué índices existen para objetos pertenecientes al esquema de SCOTT y sobre qué columnas están definidos. Averigua en qué fichero o ficheros de datos se encuentran las extensiones de sus segmentos correspondientes.
 
 6. Resuelve el siguiente caso práctico en ORACLE:
 
 En nuestra empresa existen tres departamentos: Informática, Ventas y Producción. En Informática trabajan tres personas: Pepe, Juan y Clara. En Ventas trabajan Ana y Eva y en Producción Jaime y Lidia.
+CREATE USER Pepe IDENTIFIED BY Pepe;
+CREATE USER Juan IDENTIFIED BY Juan;
+CREATE USER Clara IDENTIFIED BY Clara;
+CREATE USER Ana IDENTIFIED BY Ana;
+CREATE USER Eva IDENTIFIED BY Eva;
+CREATE USER Jaime IDENTIFIED BY Jaime;
+CREATE USER Lidia IDENTIFIED BY Lidia;
+GRANT CONNECT TO Pepe, Juan, Clara, Ana, Eva, Jaime, Lidia;
+
+
+
+
+
 
 a) Pepe es el administrador de la base de datos. Juan y Clara son los programadores de la base de datos, que trabajan tanto en la aplicación que usa el departamento de Ventas como en la usada por el departamento de Producción. Ana y Eva tienen permisos para insertar, modificar y borrar registros en las tablas de la aplicación de Ventas que tienes que crear, y se llaman Productos y Ventas, siendo propiedad de Ana. Jaime y Lidia pueden leer la información de esas tablas pero no pueden modificar la información. Crea los usuarios y dale los roles y permisos que creas conveniente.
+-- Conectarse como Ana y crear las tablas
+
+
+CREATE TABLE productos (
+    producto_id NUMBER PRIMARY KEY,
+    nombre VARCHAR2(100),
+    precio NUMBER(10,2)
+);
+
+CREATE TABLE ventas (
+    venta_id NUMBER PRIMARY KEY,
+    producto_id NUMBER,
+    cantidad NUMBER,
+    FOREIGN KEY (producto_id) REFERENCES productos(producto_id)
+);
+
+-- Otorgar permisos a Eva
+GRANT INSERT, UPDATE, DELETE ON ana.productos TO Eva;
+GRANT INSERT, UPDATE, DELETE ON ana.ventas TO Eva;
+
+
+
+GRANT SELECT ON ana.productos TO Jaime, Lidia;
+GRANT SELECT ON ana.ventas TO Jaime, Lidia;
+
 
 b) Los espacios de tablas son System, Producción (ficheros prod1.dbf y prod2.dbf) y Ventas (fichero vent.dbf). Los programadores del departamento de Informática pueden crear objetos en cualquier tablespace de la base de datos, excepto en System. Los demás usuarios solo podrán crear objetos en su tablespace correspondiente teniendo un límite de espacio de 30 M los del departamento de Ventas y 100K los del de Producción. Pepe tiene cuota ilimitada en todos los espacios, aunque el suyo por defecto es System.
+CREATE TABLESPACE Produccion 
+  DATAFILE '/path_to_your_oracle_data_files/prod1.dbf' SIZE 30M,
+            '/path_to_your_oracle_data_files/prod2.dbf' SIZE 30M;
+
+CREATE TABLESPACE Ventas 
+  DATAFILE '/path_to_your_oracle_data_files/vent.dbf' SIZE 30M;
+
+Reemplaza /path_to_your_oracle_data_files/ con la ruta real donde deseas almacenar los archivos de datos en tu servidor.
+Asignación de Cuotas de Espacio
+
+Luego, asigna las cuotas de espacio para cada usuario. Esto se hace con el comando ALTER USER. Por ejemplo:
+
+sql
+
+-- Asignar cuotas a los usuarios del departamento de Ventas
+ALTER USER Ana QUOTA 30M ON Ventas;
+ALTER USER Eva QUOTA 30M ON Ventas;
+
+-- Asignar cuotas a los usuarios del departamento de Producción
+ALTER USER Jaime QUOTA 100K ON Produccion;
+ALTER USER Lidia QUOTA 100K ON Produccion;
+
+-- Pepe tiene cuota ilimitada en todos los tablespaces
+ALTER USER Pepe QUOTA UNLIMITED ON Produccion;
+ALTER USER Pepe QUOTA UNLIMITED ON Ventas;
+
 
 c) Pepe quiere crear una tabla Prueba que ocupe inicialmente 256K en el tablespace Ventas.
 
+CREATE TABLE Prueba (
+    id NUMBER,
+    datos VARCHAR2(255)
+) TABLESPACE Ventas
+  STORAGE (
+    INITIAL 256K
+  );
+
+
+
 d) Pepe decide que los programadores tengan acceso a la tabla Prueba antes creada y puedan ceder ese derecho y el de conectarse a la base de datos a los usuarios que ellos quieran.
+GRANT SELECT, INSERT, UPDATE, DELETE ON Pepe.Prueba TO Juan, Clara WITH GRANT OPTION;
+
+GRANT GRANT ANY PRIVILEGE TO Juan, Clara;
+GRANT CREATE SESSION TO Juan, Clara;
+
 
 e) Lidia y Jaime dejan la empresa, borra los usuarios y el espacio de tablas correspondiente, detalla los pasos necesarios para que no quede rastro del espacio de tablas.
+
+
+
+DROP USER Lidia CASCADE;
+
+
+
+
+DROP USER Jaime CASCADE;
+
+DROP TABLESPACE nombre_table_space INCLUDING CONTENTS AND DATAFILES;
+
+
 
 Postgres:
 
