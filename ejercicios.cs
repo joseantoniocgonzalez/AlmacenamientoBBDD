@@ -8,7 +8,8 @@ Puntuación Máxima: 100 puntos.
 
 ORACLE:
 
-1. Establece que los objetos que se creen en el TS1 (creado por tí) tengan un tamaño inicial de 200K, y que cada extensión sea del doble del tamaño que la anterior. El número máximo de extensiones debe ser de 3.
+1. Establece que los objetos que se creen en el TS1 (creado por tí) tengan un tamaño inicial de 200K, y que cada extensión sea del doble del tamaño que la anterior.
+el número máximo de extensiones debe ser de 3.
 
 CREATE TABLESPACE TS1 
 DATAFILE '/opt/oracle/oradata/ORCLCDB/ts1.dbf' SIZE 200K 
@@ -189,7 +190,13 @@ Cuando el tablespace TS2 se llena, Oracle arrojará un error (typicamente ORA-01
 
 
 
-5. Realiza una consulta al diccionario de datos que muestre qué índices existen para objetos pertenecientes al esquema de SCOTT y sobre qué columnas están definidos. Averigua en qué fichero o ficheros de datos se encuentran las extensiones de sus segmentos correspondientes.
+5. Realiza una consulta al diccionario de datos que muestre qué índices existen para objetos pertenecientes al esquema de SCOTT y 
+sobre qué columnas están definidos. Averigua en qué fichero o ficheros de datos se encuentran las extensiones de sus segmentos correspondientes.
+
+SELECT INDEX_NAME, COLUMN_NAME, TABLE_NAME, TABLE_OWNER
+FROM DBA_IND_COLUMNS
+WHERE TABLE_OWNER = 'SCOTT';
+
 
 6. Resuelve el siguiente caso práctico en ORACLE:
 
@@ -204,96 +211,71 @@ CREATE USER Lidia IDENTIFIED BY Lidia;
 GRANT CONNECT TO Pepe, Juan, Clara, Ana, Eva, Jaime, Lidia;
 
 
+Pepe es el administrador
+
+alter session set "_ORACLE_SCRIPT"=true;
+CREATE USER pepe IDENTIFIED BY pepe DEFAULT TABLESPACE system QUOTA UNLIMITED ON system;
+GRANT DBA TO pepe;
+
+Juan y Clara son los programadores 
+
+CREATE USER juan IDENTIFIED BY  juan;
+CREATE USER clara IDENTIFIED BY clara;
 
 
+Ana y Eva tienen permisos para insertar, modificar y borrar registros en las tablas de la aplicación de Ventas que tienes que crear, y se llaman Productos y Ventas, siendo propiedad de Ana.
+
+CREATE USER ana IDENTIFIED BY ana;
+ALTER USER ana QUOTA UNLIMITED ON USERS;
+
+CREATE USER eva IDENTIFIED BY eva;
+
+ALTER SESSION SET CURRENT_SCHEMA = ana;
 
 
-a) Pepe es el administrador de la base de datos. Juan y Clara son los programadores de la base de datos, que trabajan tanto en la aplicación que usa el departamento de Ventas como en la usada por el departamento de Producción. Ana y Eva tienen permisos para insertar, modificar y borrar registros en las tablas de la aplicación de Ventas que tienes que crear, y se llaman Productos y Ventas, siendo propiedad de Ana. Jaime y Lidia pueden leer la información de esas tablas pero no pueden modificar la información. Crea los usuarios y dale los roles y permisos que creas conveniente.
--- Conectarse como Ana y crear las tablas
-
-
-CREATE TABLE productos (
-    producto_id NUMBER PRIMARY KEY,
-    nombre VARCHAR2(100),
-    precio NUMBER(10,2)
+CREATE TABLE articulos (
+    articulo_id NUMBER PRIMARY KEY,
+    descripcion VARCHAR2(25),
+    precio_unitario NUMBER(10,2)
 );
 
-CREATE TABLE ventas (
-    venta_id NUMBER PRIMARY KEY,
-    producto_id NUMBER,
+INSERT INTO articulos (articulo_id, descripcion, precio_unitario) VALUES (1, 'Laptop 15 Pulgadas', 1200.00);
+INSERT INTO articulos (articulo_id, descripcion, precio_unitario) VALUES (2, 'Teclado Mecánico', 150.50);
+INSERT INTO articulos (articulo_id, descripcion, precio_unitario) VALUES (3, 'Mouse Inalámbrico', 75.25);
+
+
+
+CREATE TABLE pedidos (
+    pedido_id NUMBER PRIMARY KEY,
+    articulo_id NUMBER,
     cantidad NUMBER,
-    FOREIGN KEY (producto_id) REFERENCES productos(producto_id)
+    fecha_pedido DATE,
+    FOREIGN KEY (articulo_id) REFERENCES articulos(articulo_id)
 );
 
--- Otorgar permisos a Eva
-GRANT INSERT, UPDATE, DELETE ON ana.productos TO Eva;
-GRANT INSERT, UPDATE, DELETE ON ana.ventas TO Eva;
 
-
-
-GRANT SELECT ON ana.productos TO Jaime, Lidia;
-GRANT SELECT ON ana.ventas TO Jaime, Lidia;
-
-
-b) Los espacios de tablas son System, Producción (ficheros prod1.dbf y prod2.dbf) y Ventas (fichero vent.dbf). Los programadores del departamento de Informática pueden crear objetos en cualquier tablespace de la base de datos, excepto en System. Los demás usuarios solo podrán crear objetos en su tablespace correspondiente teniendo un límite de espacio de 30 M los del departamento de Ventas y 100K los del de Producción. Pepe tiene cuota ilimitada en todos los espacios, aunque el suyo por defecto es System.
-CREATE TABLESPACE Produccion 
-  DATAFILE '/path_to_your_oracle_data_files/prod1.dbf' SIZE 30M,
-            '/path_to_your_oracle_data_files/prod2.dbf' SIZE 30M;
-
-CREATE TABLESPACE Ventas 
-  DATAFILE '/path_to_your_oracle_data_files/vent.dbf' SIZE 30M;
-
-Reemplaza /path_to_your_oracle_data_files/ con la ruta real donde deseas almacenar los archivos de datos en tu servidor.
-Asignación de Cuotas de Espacio
-
-Luego, asigna las cuotas de espacio para cada usuario. Esto se hace con el comando ALTER USER. Por ejemplo:
-
-sql
-
--- Asignar cuotas a los usuarios del departamento de Ventas
-ALTER USER Ana QUOTA 30M ON Ventas;
-ALTER USER Eva QUOTA 30M ON Ventas;
-
--- Asignar cuotas a los usuarios del departamento de Producción
-ALTER USER Jaime QUOTA 100K ON Produccion;
-ALTER USER Lidia QUOTA 100K ON Produccion;
-
--- Pepe tiene cuota ilimitada en todos los tablespaces
-ALTER USER Pepe QUOTA UNLIMITED ON Produccion;
-ALTER USER Pepe QUOTA UNLIMITED ON Ventas;
-
-
-c) Pepe quiere crear una tabla Prueba que ocupe inicialmente 256K en el tablespace Ventas.
-
-CREATE TABLE Prueba (
-    id NUMBER,
-    datos VARCHAR2(255)
-) TABLESPACE Ventas
-  STORAGE (
-    INITIAL 256K
-  );
+INSERT INTO pedidos (pedido_id, articulo_id, cantidad, fecha_pedido) VALUES (1, 1, 2, TO_DATE('2024-03-01', 'YYYY-MM-DD'));
+INSERT INTO pedidos (pedido_id, articulo_id, cantidad, fecha_pedido) VALUES (2, 2, 1, TO_DATE('2024-03-02', 'YYYY-MM-DD'));
+INSERT INTO pedidos (pedido_id, articulo_id, cantidad, fecha_pedido) VALUES (3, 3, 3, TO_DATE('2024-03-03', 'YYYY-MM-DD'));
 
 
 
 d) Pepe decide que los programadores tengan acceso a la tabla Prueba antes creada y puedan ceder ese derecho y el de conectarse a la base de datos a los usuarios que ellos quieran.
-GRANT SELECT, INSERT, UPDATE, DELETE ON Pepe.Prueba TO Juan, Clara WITH GRANT OPTION;
 
-GRANT GRANT ANY PRIVILEGE TO Juan, Clara;
-GRANT CREATE SESSION TO Juan, Clara;
+GRANT SELECT, INSERT, UPDATE, DELETE ON pepe.prueba TO programadores;
+GRANT GRANT ANY OBJECT PRIVILEGE TO programadores;
+GRANT CREATE SESSION TO programadores;
 
-
-e) Lidia y Jaime dejan la empresa, borra los usuarios y el espacio de tablas correspondiente, detalla los pasos necesarios para que no quede rastro del espacio de tablas.
-
-
-
-DROP USER Lidia CASCADE;
+    f) Lidia y Jaime dejan la empresa, borra los usuarios y el espacio de tablas correspondiente, detalla los pasos necesarios para que no quede rastro del espacio de tablas.
 
 
 
 
-DROP USER Jaime CASCADE;
+DROP USER lidia CASCADE;
+DROP USER jaime CASCADE;
 
-DROP TABLESPACE nombre_table_space INCLUDING CONTENTS AND DATAFILES;
+
+
 
 
 
@@ -308,7 +290,9 @@ Oracle y PostgreSQL gestionan el almacenamiento de datos de manera diferente, lo
 
 ## Oracle
 
-En Oracle, un **segmento** es un conjunto de estructuras de almacenamiento, como tablas o índices, que ocupan espacio de almacenamiento. Un **segmento** se compone de uno o más **extensiones**, que son unidades de espacio que se asignan a un segmento cuando este necesita crecer. Los segmentos y extensiones son fundamentales en la gestión del espacio en Oracle, permitiendo un control detallado y flexible del almacenamiento de datos.
+En Oracle, un **segmento** es un conjunto de estructuras de almacenamiento, como tablas o índices, 
+que ocupan espacio de almacenamiento. Un **segmento** se compone de uno o más **extensiones**, que son unidades de espacio que se asignan a un segmento cuando este necesita crecer.
+ Los segmentos y extensiones son fundamentales en la gestión del espacio en Oracle, permitiendo un control detallado y flexible del almacenamiento de datos.
 
 - **Características clave**:
   - Los segmentos se clasifican por tipo, incluyendo segmentos de tabla, segmentos de índice, y otros.
@@ -316,17 +300,28 @@ En Oracle, un **segmento** es un conjunto de estructuras de almacenamiento, como
 
 ## PostgreSQL
 
-PostgreSQL no utiliza los términos **segmento** y **extensión** como tales. En su lugar, gestiona el almacenamiento a través de un conjunto de archivos en el sistema de archivos del servidor. La unidad básica de almacenamiento en PostgreSQL es el **bloque**, típicamente de 8KB, y las tablas se almacenan en un conjunto de archivos de un gigabyte llamados **"forks"**. Cuando una tabla o índice crece más allá del tamaño de un archivo, PostgreSQL crea automáticamente un nuevo archivo (o "fork").
+PostgreSQL no utiliza los términos **segmento** y **extensión** como tales. En su lugar, gestiona el almacenamiento 
+a través de un conjunto de archivos en el sistema de archivos del servidor. La unidad básica de almacenamiento en PostgreSQL es el **bloque**,
+ típicamente de 8KB, y las tablas se almacenan en un conjunto de archivos de un gigabyte llamados **"forks"**. Cuando una tabla o índice crece más allá del tamaño de un archivo,
+  PostgreSQL crea automáticamente un nuevo archivo (o "fork").
 
 - **Características clave**:
-  - El almacenamiento de datos se basa en archivos que pueden expandirse según sea necesario, pero el concepto es más abstracto que en Oracle y menos visible para el administrador de la base de datos.
+
+  - El almacenamiento de datos se basa en archivos que pueden expandirse según sea necesario, pero el concepto es más abstracto que en Oracle y
+   menos visible para el administrador de la base de datos.
+
   - PostgreSQL maneja internamente el crecimiento de los archivos de datos y la asignación de espacio sin necesidad de una intervención manual detallada en términos de segmentos y extensiones.
 
 ## Comparación y Diferencias Clave
 
-- **Gestión del Espacio**: Oracle proporciona una gestión detallada del espacio a través de segmentos y extensiones, mientras que PostgreSQL maneja el espacio de manera más automática y abstracta.
-- **Visibilidad para el Administrador**: Oracle permite a los administradores de bases de datos tener un control y una visibilidad más detallados sobre cómo se asigna y utiliza el espacio en disco. En PostgreSQL, este proceso es más automatizado y menos transparente.
-- **Flexibilidad y Control**: Oracle ofrece más flexibilidad y control en la administración del espacio de almacenamiento, lo cual es esencial en entornos empresariales grandes y complejos. PostgreSQL simplifica la gestión del espacio, lo que puede ser beneficioso para sistemas más pequeños o para aquellos que prefieren una administración menos compleja.
+- **Gestión del Espacio**: Oracle proporciona una gestión detallada del espacio a través de segmentos y extensiones, mientras que PostgreSQL 
+maneja el espacio de manera más automática y abstracta.
+
+- **Visibilidad para el Administrador**: Oracle permite a los administradores de bases de datos tener un control y una visibilidad más detallados 
+sobre cómo se asigna y utiliza el espacio en disco. En PostgreSQL, este proceso es más automatizado y menos transparente.
+
+- **Flexibilidad y Control**: Oracle ofrece más flexibilidad y control en la administración del espacio de almacenamiento, lo cual es esencial 
+en entornos empresariales grandes y complejos. PostgreSQL simplifica la gestión del espacio, lo que puede ser beneficioso para sistemas más pequeños o para aquellos que prefieren una administración menos compleja.
 
 ## Fuentes para Consulta
 
@@ -352,7 +347,8 @@ Tanto MySQL como Oracle utilizan el concepto de espacios de tablas (tablespaces)
 
 ## Espacios de Tablas en MySQL
 
-En MySQL, un espacio de tablas es una unidad de almacenamiento que consiste en uno o más archivos en el sistema de archivos que almacenan los datos para una o más tablas y sus índices. Los espacios de tablas permiten a MySQL gestionar el almacenamiento de datos de manera eficiente.
+En MySQL, un espacio de tablas es una unidad de almacenamiento que consiste en uno o más archivos en el sistema de archivos que 
+almacenan los datos para una o más tablas y sus índices. Los espacios de tablas permiten a MySQL gestionar el almacenamiento de datos de manera eficiente.
 
 - **Características clave**:
   - A partir de MySQL 5.6, se introdujo la característica de tablespaces generales que permite a los usuarios definir tablespaces fuera del sistema de archivos de base de datos predeterminado.
@@ -365,7 +361,8 @@ En MySQL, un espacio de tablas es una unidad de almacenamiento que consiste en u
 
 ## Tablespaces en Oracle
 
-Oracle utiliza tablespaces como la estructura principal de almacenamiento para organizar y almacenar los datos. Un tablespace en Oracle puede contener distintos tipos de objetos de base de datos, como tablas, índices, y grandes objetos (LOBs). 
+Oracle utiliza tablespaces como la estructura principal de almacenamiento para organizar y almacenar los datos. Un tablespace en Oracle puede contener
+ distintos tipos de objetos de base de datos, como tablas, índices, y grandes objetos (LOBs). 
 
 - **Características clave**:
   - Los tablespaces en Oracle pueden ser de varios tipos, como pequeños y grandes archivos (smallfile y bigfile).
@@ -378,11 +375,15 @@ Oracle utiliza tablespaces como la estructura principal de almacenamiento para o
 
 ## Diferencias Clave
 
-- **Flexibilidad y Uso**: Oracle ofrece una mayor flexibilidad en la gestión de tablespaces, incluyendo tipos especializados y avanzadas capacidades de administración. MySQL, aunque ha mejorado su soporte de tablespaces, se enfoca en simplicidad y eficiencia dentro de su modelo de gestión.
-- **Soporte Multitable**: MySQL desde la versión 5.7 permite tablespaces generales que pueden contener múltiples tablas, un concepto que Oracle ha soportado desde hace mucho tiempo con sus tablespaces que pueden albergar diversos tipos de objetos de base de datos.
-- **Funcionalidades Avanzadas**: Oracle ofrece funcionalidades más avanzadas como tablespaces temporales y de deshacer, y la capacidad de transportar tablespaces entre bases de datos, lo cual es particularmente útil en entornos empresariales y de alta disponibilidad.
+- **Flexibilidad y Uso**: Oracle ofrece una mayor flexibilidad en la gestión de tablespaces, incluyendo tipos especializados y avanzadas capacidades
+de administración. MySQL, aunque ha mejorado su soporte de tablespaces, se enfoca en simplicidad y eficiencia dentro de su modelo de gestión.
+- **Soporte Multitable**: MySQL desde la versión 5.7 permite tablespaces generales que pueden contener múltiples tablas, un concepto que Oracle ha 
+soportado desde hace mucho tiempo con sus tablespaces que pueden albergar diversos tipos de objetos de base de datos.
+- **Funcionalidades Avanzadas**: Oracle ofrece funcionalidades más avanzadas como tablespaces temporales y de deshacer, y la capacidad de transportar 
+tablespaces entre bases de datos, lo cual es particularmente útil en entornos empresariales y de alta disponibilidad.
 
-Estas diferencias reflejan las filosofías subyacentes de cada sistema de gestión de bases de datos, con Oracle apuntando a entornos empresariales de gran escala y MySQL ofreciendo una solución eficiente y de fácil manejo.
+Estas diferencias reflejan las filosofías subyacentes de cada sistema de gestión de bases de datos, con Oracle apuntando a entornos empresariales de
+ gran escala y MySQL ofreciendo una solución eficiente y de fácil manejo.
 
 
 MongoDB:
@@ -394,11 +395,14 @@ MongoDB:
 
 # Almacenamiento de Colecciones en MongoDB
 
-En MongoDB, la asignación directa de colecciones a archivos específicos en el sistema de archivos no es una característica disponible para los usuarios. La gestión del almacenamiento es manejada de manera automática por MongoDB, siguiendo un enfoque que abstrae los detalles de almacenamiento a nivel de archivo para simplificar la administración de la base de datos.
+En MongoDB, la asignación directa de colecciones a archivos específicos en el sistema de archivos no es una característica disponible para los usuarios. 
+La gestión del almacenamiento es manejada de manera automática por MongoDB, siguiendo un enfoque que abstrae los detalles de almacenamiento a nivel de archivo para simplificar
+ la administración de la base de datos.
 
 ## Métodos Indirectos de Influencia en el Almacenamiento
 
-Aunque no se puede decidir directamente el archivo específico para una colección, existen algunas características y técnicas que permiten influir de manera indirecta en cómo y dónde se almacenan los datos:
+Aunque no se puede decidir directamente el archivo específico para una colección, existen algunas características y técnicas que permiten influir de manera indirecta en cómo 
+y dónde se almacenan los datos:
 
 ### 1. Sharding
 
@@ -416,7 +420,8 @@ Aunque no se puede decidir directamente el archivo específico para una colecci�
 - **Propósito**: Ofrece optimización automática del almacenamiento y el rendimiento de los datos, sin permitir asignación de colecciones a archivos específicos.
 
 ## Conclusión
-MongoDB está diseñado para manejar el almacenamiento de datos de forma eficiente y automática, sin requerir ni permitir la intervención manual en la asignación específica de colecciones a archivos. Este diseño busca simplificar la administración de la base de datos y optimizar el rendimiento y la escalabilidad sin sacrificar la flexibilidad.
+MongoDB está diseñado para manejar el almacenamiento de datos de forma eficiente y automática, sin requerir ni permitir la intervención manual en la asignación específica
+ de colecciones a archivos. Este diseño busca simplificar la administración de la base de datos y optimizar el rendimiento y la escalabilidad sin sacrificar la flexibilidad.
 
 
 
