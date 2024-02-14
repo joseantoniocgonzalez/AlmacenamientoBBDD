@@ -8,7 +8,8 @@ Puntuación Máxima: 100 puntos.
 
 ORACLE:
 
-1. Establece que los objetos que se creen en el TS1 (creado por tí) tengan un tamaño inicial de 200K, y que cada extensión sea del doble del tamaño que la anterior.
+1. Establece que los objetos que se creen en el TS1 (creado por tí) tengan un tamaño inicial de 200K, 
+    y que cada extensión sea del doble del tamaño que la anterior.
 el número máximo de extensiones debe ser de 3.
 
 CREATE TABLESPACE TS1 
@@ -130,11 +131,14 @@ DROP TABLE empleados;
     de datos.
 
 
-4. Crea un espacio de tablas TS2 con dos ficheros en rutas diferentes de 1M cada uno no autoextensibles. Crea en el citado tablespace una tabla con la clausula de almacenamiento que quieras. Inserta registros hasta que se llene el tablespace. ¿Qué ocurre?
+4. Crea un espacio de tablas TS2 con dos ficheros en rutas diferentes de 1M cada uno no autoextensibles. 
+        Crea en el citado tablespace una tabla con la clausula de almacenamiento que quieras. Inserta registros
+        hasta que se llene el tablespace. ¿Qué ocurre?
 
 1. Creación de un Tablespace
 
-Este comando crea un tablespace llamado TS2 con dos archivos de datos, especificando rutas, tamaños y la opción de no autoextenderse.
+Este comando crea un tablespace llamado TS2 con dos archivos de datos, especificando rutas, 
+tamaños y la opción de no autoextenderse.
 
 
 CREATE TABLESPACE TS2 
@@ -190,8 +194,10 @@ Cuando el tablespace TS2 se llena, Oracle arrojará un error (typicamente ORA-01
 
 
 
-5. Realiza una consulta al diccionario de datos que muestre qué índices existen para objetos pertenecientes al esquema de SCOTT y 
-sobre qué columnas están definidos. Averigua en qué fichero o ficheros de datos se encuentran las extensiones de sus segmentos correspondientes.
+5. Realiza una consulta al diccionario de datos que muestre qué índices existen para objetos 
+     pertenecientes al esquema de SCOTT y 
+sobre qué columnas están definidos. Averigua en qué fichero o ficheros de datos se encuentran
+las extensiones de sus segmentos correspondientes.
 
 SELECT INDEX_NAME, COLUMN_NAME, TABLE_NAME, TABLE_OWNER
 FROM DBA_IND_COLUMNS
@@ -223,7 +229,8 @@ CREATE USER juan IDENTIFIED BY  juan;
 CREATE USER clara IDENTIFIED BY clara;
 
 
-Ana y Eva tienen permisos para insertar, modificar y borrar registros en las tablas de la aplicación de Ventas que tienes que crear, y se llaman Productos y Ventas, siendo propiedad de Ana.
+Ana y Eva tienen permisos para insertar, modificar y borrar registros en las tablas de la aplicación de Ventas 
+    que tienes que crear, y se llaman Productos y Ventas, siendo propiedad de Ana.
 
 CREATE USER ana IDENTIFIED BY ana;
 ALTER USER ana QUOTA UNLIMITED ON USERS;
@@ -281,18 +288,22 @@ DROP USER jaime CASCADE;
 
 Postgres:
 
-7. Averigua si existe el concepto de segmento y el de extensión en Postgres, en qué consiste y las diferencias con los conceptos correspondientes de ORACLE.
+7. Averigua si existe el concepto de segmento y el de extensión en Postgres, en qué consiste y 
+    las diferencias con los conceptos correspondientes de ORACLE.
 
 
 # Conceptos de Segmento y Extensión en PostgreSQL vs. Oracle
 
-Oracle y PostgreSQL gestionan el almacenamiento de datos de manera diferente, lo que se refleja en sus conceptos de segmentos y extensiones.
+Oracle y PostgreSQL gestionan el almacenamiento de datos de manera diferente, lo que se refleja 
+en sus conceptos de segmentos y extensiones.
 
 ## Oracle
 
 En Oracle, un **segmento** es un conjunto de estructuras de almacenamiento, como tablas o índices, 
-que ocupan espacio de almacenamiento. Un **segmento** se compone de uno o más **extensiones**, que son unidades de espacio que se asignan a un segmento cuando este necesita crecer.
- Los segmentos y extensiones son fundamentales en la gestión del espacio en Oracle, permitiendo un control detallado y flexible del almacenamiento de datos.
+que ocupan espacio de almacenamiento. Un **segmento** se compone de uno o más **extensiones**, que son unidades
+    de espacio que se asignan a un segmento cuando este necesita crecer.
+ Los segmentos y extensiones son fundamentales en la gestión del espacio en Oracle, permitiendo un control 
+    detallado y flexible del almacenamiento de datos.
 
 - **Características clave**:
   - Los segmentos se clasifican por tipo, incluyendo segmentos de tabla, segmentos de índice, y otros.
@@ -301,20 +312,25 @@ que ocupan espacio de almacenamiento. Un **segmento** se compone de uno o más *
 ## PostgreSQL
 
 PostgreSQL no utiliza los términos **segmento** y **extensión** como tales. En su lugar, gestiona el almacenamiento 
-a través de un conjunto de archivos en el sistema de archivos del servidor. La unidad básica de almacenamiento en PostgreSQL es el **bloque**,
- típicamente de 8KB, y las tablas se almacenan en un conjunto de archivos de un gigabyte llamados **"forks"**. Cuando una tabla o índice crece más allá del tamaño de un archivo,
+a través de un conjunto de archivos en el sistema de archivos del servidor. La unidad básica de almacenamiento 
+en PostgreSQL es el **bloque**,
+ típicamente de 8KB, y las tablas se almacenan en un conjunto de archivos de un gigabyte llamados **"forks"**. 
+     Cuando una tabla o índice crece más allá del tamaño de un archivo,
   PostgreSQL crea automáticamente un nuevo archivo (o "fork").
 
 - **Características clave**:
 
-  - El almacenamiento de datos se basa en archivos que pueden expandirse según sea necesario, pero el concepto es más abstracto que en Oracle y
+  - El almacenamiento de datos se basa en archivos que pueden expandirse según sea necesario, pero el concepto 
+      es más abstracto que en Oracle y
    menos visible para el administrador de la base de datos.
 
-  - PostgreSQL maneja internamente el crecimiento de los archivos de datos y la asignación de espacio sin necesidad de una intervención manual detallada en términos de segmentos y extensiones.
+  - PostgreSQL maneja internamente el crecimiento de los archivos de datos y la asignación de espacio 
+      sin necesidad de una intervención manual detallada en términos de segmentos y extensiones.
 
 ## Comparación y Diferencias Clave
 
-- **Gestión del Espacio**: Oracle proporciona una gestión detallada del espacio a través de segmentos y extensiones, mientras que PostgreSQL 
+- **Gestión del Espacio**: Oracle proporciona una gestión detallada del espacio a través de segmentos y 
+extensiones, mientras que PostgreSQL 
 maneja el espacio de manera más automática y abstracta.
 
 - **Visibilidad para el Administrador**: Oracle permite a los administradores de bases de datos tener un control y una visibilidad más detallados 
@@ -331,7 +347,9 @@ en entornos empresariales grandes y complejos. PostgreSQL simplifica la gestión
 - **Oracle Documentation**: Para detalles sobre la gestión de segmentos y extensiones en Oracle.
   - [Managing Space for Schema Objects in Oracle](https://docs.oracle.com/en/database/oracle/oracle-database/19/admin/managing-space-for-schema-objects.html)
 
-Estas diferencias reflejan las filosofías de diseño y los objetivos de uso de cada sistema de gestión de bases de datos, con Oracle enfocándose en ofrecer gran control y flexibilidad en entornos empresariales, mientras que PostgreSQL busca simplificar la gestión del almacenamiento y la administración de la base de datos.
+Estas diferencias reflejan las filosofías de diseño y los objetivos de uso de cada sistema de 
+gestión de bases de datos, con Oracle enfocándose en ofrecer gran control y flexibilidad en entornos empresariales,
+mientras que PostgreSQL busca simplificar la gestión del almacenamiento y la administración de la base de datos.
 
 
 
@@ -343,16 +361,21 @@ MySQL:
 8. Averigua si existe el concepto de espacio de tablas en MySQL y las diferencias con los tablespaces de ORACLE.
 
 
-Tanto MySQL como Oracle utilizan el concepto de espacios de tablas (tablespaces) pero con diferencias notables en su implementación y uso.
+Tanto MySQL como Oracle utilizan el concepto de espacios de tablas (tablespaces) pero con diferencias notables 
+ en su implementación y uso.
 
 ## Espacios de Tablas en MySQL
 
-En MySQL, un espacio de tablas es una unidad de almacenamiento que consiste en uno o más archivos en el sistema de archivos que 
-almacenan los datos para una o más tablas y sus índices. Los espacios de tablas permiten a MySQL gestionar el almacenamiento de datos de manera eficiente.
+En MySQL, un espacio de tablas es una unidad de almacenamiento que consiste en uno o más archivos
+en el sistema de archivos que 
+almacenan los datos para una o más tablas y sus índices. Los espacios de tablas permiten a MySQL
+gestionar el almacenamiento de datos de manera eficiente.
 
 - **Características clave**:
-  - A partir de MySQL 5.6, se introdujo la característica de tablespaces generales que permite a los usuarios definir tablespaces fuera del sistema de archivos de base de datos predeterminado.
-  - MySQL 8.0 expande las capacidades de los tablespaces, incluyendo la posibilidad de crear tablespaces para InnoDB que pueden albergar múltiples tablas.
+  - A partir de MySQL 5.6, se introdujo la característica de tablespaces generales que permite 
+    a los usuarios definir tablespaces fuera del sistema de archivos de base de datos predeterminado.
+  - MySQL 8.0 expande las capacidades de los tablespaces, incluyendo la posibilidad de crear tablespaces 
+    para InnoDB que pueden albergar múltiples tablas.
   - Permite una mejor gestión del almacenamiento y optimización del rendimiento.
 
 - **URLs para consulta**:
@@ -366,8 +389,10 @@ Oracle utiliza tablespaces como la estructura principal de almacenamiento para o
 
 - **Características clave**:
   - Los tablespaces en Oracle pueden ser de varios tipos, como pequeños y grandes archivos (smallfile y bigfile).
-  - Oracle permite una gestión avanzada de tablespaces, incluyendo tablespaces temporales y de deshacer, así como la capacidad de transportar tablespaces entre distintas bases de datos.
-  - Ofrece funcionalidades avanzadas de segmentación y particionamiento dentro de los tablespaces para optimizar el rendimiento y la gestión del espacio.
+  - Oracle permite una gestión avanzada de tablespaces, incluyendo tablespaces temporales y de deshacer,
+    así como la capacidad de transportar tablespaces entre distintas bases de datos.
+  - Ofrece funcionalidades avanzadas de segmentación y particionamiento dentro de los tablespaces para 
+    optimizar el rendimiento y la gestión del espacio.
 
 - **URLs para consulta**:
   - [Managing Tablespaces in Oracle](https://docs.oracle.com/en/database/oracle/oracle-database/19/admin/managing-tablespaces.html)
@@ -375,14 +400,18 @@ Oracle utiliza tablespaces como la estructura principal de almacenamiento para o
 
 ## Diferencias Clave
 
-- **Flexibilidad y Uso**: Oracle ofrece una mayor flexibilidad en la gestión de tablespaces, incluyendo tipos especializados y avanzadas capacidades
-de administración. MySQL, aunque ha mejorado su soporte de tablespaces, se enfoca en simplicidad y eficiencia dentro de su modelo de gestión.
-- **Soporte Multitable**: MySQL desde la versión 5.7 permite tablespaces generales que pueden contener múltiples tablas, un concepto que Oracle ha 
+- **Flexibilidad y Uso**: Oracle ofrece una mayor flexibilidad en la gestión de tablespaces, incluyendo
+tipos especializados y avanzadas capacidades
+de administración. MySQL, aunque ha mejorado su soporte de tablespaces, se enfoca en simplicidad y 
+eficiencia dentro de su modelo de gestión.
+- **Soporte Multitable**: MySQL desde la versión 5.7 permite tablespaces generales que pueden contener 
+múltiples tablas, un concepto que Oracle ha 
 soportado desde hace mucho tiempo con sus tablespaces que pueden albergar diversos tipos de objetos de base de datos.
 - **Funcionalidades Avanzadas**: Oracle ofrece funcionalidades más avanzadas como tablespaces temporales y de deshacer, y la capacidad de transportar 
 tablespaces entre bases de datos, lo cual es particularmente útil en entornos empresariales y de alta disponibilidad.
 
-Estas diferencias reflejan las filosofías subyacentes de cada sistema de gestión de bases de datos, con Oracle apuntando a entornos empresariales de
+Estas diferencias reflejan las filosofías subyacentes de cada sistema de gestión de bases de datos, con Oracle 
+apuntando a entornos empresariales de
  gran escala y MySQL ofreciendo una solución eficiente y de fácil manejo.
 
 
@@ -395,8 +424,10 @@ MongoDB:
 
 # Almacenamiento de Colecciones en MongoDB
 
-En MongoDB, la asignación directa de colecciones a archivos específicos en el sistema de archivos no es una característica disponible para los usuarios. 
-La gestión del almacenamiento es manejada de manera automática por MongoDB, siguiendo un enfoque que abstrae los detalles de almacenamiento a nivel de archivo para simplificar
+En MongoDB, la asignación directa de colecciones a archivos específicos en el sistema de archivos no es una 
+característica disponible para los usuarios. 
+La gestión del almacenamiento es manejada de manera automática por MongoDB, siguiendo un enfoque que abstrae 
+los detalles de almacenamiento a nivel de archivo para simplificar
  la administración de la base de datos.
 
 ## Métodos Indirectos de Influencia en el Almacenamiento
@@ -407,21 +438,28 @@ y dónde se almacenan los datos:
 ### 1. Sharding
 
 - **Descripción**: Distribuye los datos de una base de datos entre varios servidores (shards).
-- **Propósito**: Permite la escalabilidad horizontal, pero no controla el almacenamiento a nivel de archivos individuales dentro de un servidor.
+- **Propósito**: Permite la escalabilidad horizontal, pero no controla el almacenamiento a nivel de archivos
+ individuales dentro de un servidor.
 
 ### 2. Particiones a Nivel de Sistema Operativo o Almacenamiento
 
-- **Descripción**: Configurar el sistema de archivos o soluciones de almacenamiento para designar en qué dispositivo físico o partición se almacenan los datos de MongoDB.
-- **Propósito**: Afecta a toda la instancia de MongoDB y no a colecciones individuales, basándose en la configuración del directorio de datos.
+- **Descripción**: Configurar el sistema de archivos o soluciones de almacenamiento para designar en qué 
+dispositivo físico o partición se almacenan los datos de MongoDB.
+- **Propósito**: Afecta a toda la instancia de MongoDB y no a colecciones individuales, basándose en 
+la configuración del directorio de datos.
 
 ### 3. WiredTiger Storage Engine
 
-- **Descripción**: Motor de almacenamiento predeterminado de MongoDB, que gestiona cómo se almacenan los datos en el disco.
-- **Propósito**: Ofrece optimización automática del almacenamiento y el rendimiento de los datos, sin permitir asignación de colecciones a archivos específicos.
+- **Descripción**: Motor de almacenamiento predeterminado de MongoDB, que gestiona cómo se almacenan los datos 
+en el disco.
+- **Propósito**: Ofrece optimización automática del almacenamiento y el rendimiento de los datos, sin permitir 
+asignación de colecciones a archivos específicos.
 
 ## Conclusión
-MongoDB está diseñado para manejar el almacenamiento de datos de forma eficiente y automática, sin requerir ni permitir la intervención manual en la asignación específica
- de colecciones a archivos. Este diseño busca simplificar la administración de la base de datos y optimizar el rendimiento y la escalabilidad sin sacrificar la flexibilidad.
+MongoDB está diseñado para manejar el almacenamiento de datos de forma eficiente y automática, sin requerir
+ni permitir la intervención manual en la asignación específica
+ de colecciones a archivos. Este diseño busca simplificar la administración de la base de datos y optimizar
+ el rendimiento y la escalabilidad sin sacrificar la flexibilidad.
 
 
 
